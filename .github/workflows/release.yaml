@@ -7,11 +7,11 @@ permissions:
   packages: write
 
 env:
-  QBT_VERSION: "4.5.2"
+  QBT_VERSION: "4.3.9"
 
   # This is a positive integer number that allows to differentiate between consecutive builds of the same qBittorrent version.
   # When `QBT_VERSION` is incremented, this value must reset to 1.
-  TAG_RELEASE_NUMBER: 2
+  TAG_RELEASE_NUMBER: 1
 
 jobs:
   build:
@@ -22,7 +22,6 @@ jobs:
       matrix:
         platform:
           - "linux/amd64"
-          - "linux/arm/v6"
           - "linux/arm/v7"
           - "linux/arm64/v8"
 
@@ -65,15 +64,15 @@ jobs:
             org.opencontainers.image.vendor=qBittorrent
             org.opencontainers.image.version=${{ env.QBT_VERSION }}
           tags: |
-            qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
-            ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
+            hicasper/qbittorrent-nox:latest
+            ghcr.io/hicasper/qbittorrent-nox:latest
 
       - name: Test run
         run: |
           docker run \
             --entrypoint "/usr/bin/qbittorrent-nox" \
             --platform ${{ matrix.platform }} \
-            qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }} \
+            hicasper/qbittorrent-nox:latest \
             --version
 
       # To run the image locally:
@@ -83,11 +82,11 @@ jobs:
       - name: Export image
         run: |
           docker tag \
-            qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }} \
-            qbittorrentofficial/qbittorrent-nox:${{ env.QBT_VERSION }}
+            hicasper/qbittorrent-nox:latest \
+            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}
           docker save \
             --output qbittorrent-nox_${{ env.QBT_VERSION }}_${{ steps.set-platform-name.outputs.PLATFORM_NAME }} \
-            qbittorrentofficial/qbittorrent-nox:${{ env.QBT_VERSION }}
+            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -110,8 +109,8 @@ jobs:
 
       - name: Upload to registries
         run: |
-          docker push qbittorrentofficial/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
-          docker push ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
+          docker push hicasper/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
+          docker push ghcr.io/hicasper/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
 
 
   upload:
@@ -123,29 +122,17 @@ jobs:
       - name: Create multi-arch images
         run: |
           docker manifest create \
-            qbittorrentofficial/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-amd64 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm-v6 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm-v7 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm64-v8
+            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
+            --amend hicasper/qbittorrent-nox:latest
           docker manifest create \
-            qbittorrentofficial/qbittorrent-nox:latest \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-amd64 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm-v6 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm-v7 \
-            --amend qbittorrentofficial/qbittorrent-nox:latest-linux-arm64-v8
+            hicasper/qbittorrent-nox:latest \
+            --amend hicasper/qbittorrent-nox:latest
           docker manifest create \
             ghcr.io/qbittorrent/docker-qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-amd64 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm-v6 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm-v7 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm64-v8
+            --amend ghcr.io/hicasper/qbittorrent-nox:latest
           docker manifest create \
-            ghcr.io/qbittorrent/docker-qbittorrent-nox:latest \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-amd64 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm-v6 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm-v7 \
-            --amend ghcr.io/qbittorrent/docker-qbittorrent-nox:latest-linux-arm64-v8
+            ghcr.io/hicasper/qbittorrent-nox:latest \
+            --amend ghcr.io/hicasper/qbittorrent-nox:latest
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -162,8 +149,7 @@ jobs:
 
       - name: Upload to registries
         run: |
-          docker manifest push qbittorrentofficial/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
-          docker manifest push qbittorrentofficial/qbittorrent-nox:latest
-          docker manifest push ghcr.io/qbittorrent/docker-qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
-          docker manifest push ghcr.io/qbittorrent/docker-qbittorrent-nox:latest
-          echo "::notice Remember to remove latest-* tags from Docker Hub!"
+          docker manifest push hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
+          docker manifest push hicasper/qbittorrent-nox:latest
+          docker manifest push ghcr.io/hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
+          docker manifest push ghcr.io/hicasper/qbittorrent-nox:latest
