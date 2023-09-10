@@ -64,15 +64,15 @@ jobs:
             org.opencontainers.image.vendor=qBittorrent
             org.opencontainers.image.version=${{ env.QBT_VERSION }}
           tags: |
-            hicasper/qbittorrent-nox:latest
-            ghcr.io/hicasper/qbittorrent-nox:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest
+            ghci.io/${{ github.actor }}/qbittorrent-nox:latest
 
       - name: Test run
         run: |
           docker run \
             --entrypoint "/usr/bin/qbittorrent-nox" \
             --platform ${{ matrix.platform }} \
-            hicasper/qbittorrent-nox:latest \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest \
             --version
 
       # To run the image locally:
@@ -82,11 +82,11 @@ jobs:
       - name: Export image
         run: |
           docker tag \
-            hicasper/qbittorrent-nox:latest \
-            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest \
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:${{ env.QBT_VERSION }}
           docker save \
             --output qbittorrent-nox_${{ env.QBT_VERSION }}_${{ steps.set-platform-name.outputs.PLATFORM_NAME }} \
-            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:${{ env.QBT_VERSION }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -109,8 +109,8 @@ jobs:
 
       - name: Upload to registries
         run: |
-          docker push hicasper/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
-          docker push ghcr.io/hicasper/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
+          docker push ghci.io/${{ github.actor }}/qbittorrent-nox:latest-${{ steps.set-platform-name.outputs.PLATFORM_NAME }}
 
 
   upload:
@@ -135,21 +135,21 @@ jobs:
       - name: Create multi-arch images
         run: |
           docker manifest create \
-            hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend hicasper/qbittorrent-nox:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
+            --amend ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest
           docker manifest create \
-            hicasper/qbittorrent-nox:latest \
-            --amend hicasper/qbittorrent-nox:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest \
+            --amend ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest
           docker manifest create \
             ghcr.io/qbittorrent/docker-qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }} \
-            --amend ghcr.io/hicasper/qbittorrent-nox:latest
+            --amend ghci.io/${{ github.actor }}/qbittorrent-nox:latest
           docker manifest create \
-            ghcr.io/hicasper/qbittorrent-nox:latest \
-            --amend ghcr.io/hicasper/qbittorrent-nox:latest
+            ghci.io/${{ github.actor }}/qbittorrent-nox:latest \
+            --amend ghci.io/${{ github.actor }}/qbittorrent-nox:latest
 
       - name: Upload to registries
         run: |
-          docker manifest push hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
-          docker manifest push hicasper/qbittorrent-nox:latest
-          docker manifest push ghcr.io/hicasper/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
-          docker manifest push ghcr.io/hicasper/qbittorrent-nox:latest
+          docker manifest push ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
+          docker manifest push ${{ secrets.DOCKER_HUB_USERNAME }}/qbittorrent-nox:latest
+          docker manifest push ghci.io/${{ github.actor }}/qbittorrent-nox:${{ env.QBT_VERSION }}-${{ env.TAG_RELEASE_NUMBER }}
+          docker manifest push ghci.io/${{ github.actor }}/qbittorrent-nox:latest
