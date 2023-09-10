@@ -3,7 +3,7 @@ FROM alpine:latest AS builder
 
 ARG QBT_VERSION
 ARG LIBBT_CMAKE_FLAGS=""
-ARG LIBBT_VERSION="1.2.19"
+ARG LIBBT_VERSION="1.2.18"
 
 # check environment variables
 RUN \
@@ -23,6 +23,7 @@ RUN \
     g++ \
     ninja \
     openssl-dev \
+    patch \
     qt6-qtbase-dev \
     qt6-qttools-dev
 
@@ -47,6 +48,8 @@ RUN \
     tar -xf "libtorrent-rasterbar-${LIBBT_VERSION}.tar.gz" && \
     cd "libtorrent-rasterbar-${LIBBT_VERSION}" ; \
   fi && \
+  wget -O static_build.patch "https://github.com/arvidn/libtorrent/commit/a7be63c0f36371fcba020254c38f93710dd6df4b.patch" && \
+  patch -Np1 -i static_build.patch || true && \
   cmake \
     -B build \
     -G Ninja \
