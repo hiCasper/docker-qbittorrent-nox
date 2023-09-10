@@ -14,14 +14,14 @@ if [ -n "$PGID" ]; then
 fi
 
 if [ -n "$PAGID" ]; then
-    _origIFS=$IFS
+    _origIFS="$IFS"
     IFS=','
     for AGID in $PAGID; do
         AGID=$(echo "$AGID" | tr -d '[:space:]"')
         addgroup -g "$AGID" "qbtGroup-$AGID"
         addgroup qbtUser "qbtGroup-$AGID"
     done
-    IFS=$_origIFS
+    IFS="$_origIFS"
 fi
 
 if [ ! -f "$qbtConfigFile" ]; then
@@ -44,6 +44,10 @@ else
     sed -i '/^\[LegalNotice\]$/{$!{N;s|\(\[LegalNotice\]\nAccepted=\).*|\1false|}}' "$qbtConfigFile"
 fi
 
+if [ -z "$QBT_WEBUI_PORT" ]; then
+    QBT_WEBUI_PORT=8080
+fi
+
 # those are owned by root by default
 # don't change existing files owner in `$downloadsPath`
 chown qbtUser:qbtUser "$downloadsPath"
@@ -54,8 +58,9 @@ if [ -n "$UMASK" ]; then
     umask "$UMASK"
 fi
 
-doas -u qbtUser \
-    qbittorrent-nox \
-        --profile="$profilePath" \
-        --webui-port="$QBT_WEBUI_PORT" \
-        "$@"
+exec \
+    doas -u qbtUser \
+        qbittorrent-nox \
+            --profile="$profilePath" \
+            --webui-port="$QBT_WEBUI_PORT" \
+            "$@"
