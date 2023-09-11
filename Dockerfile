@@ -5,6 +5,8 @@ ENV QBT_WEBUI_PORT=8080
 ENV QBT_CONFIG_PATH="/config"
 ENV QBT_DOWNLOADS_PATH="/qBittorrent/downloads"
 
+COPY entrypoint.sh /entrypoint.sh
+
 RUN \
   apk --no-cache add bash curl doas tini tzdata jq && \
   QBT_URL=$(curl -fsSL https://api.github.com/repos/userdocs/qbittorrent-nox-static/releases?per_page=100 | \
@@ -13,10 +15,9 @@ RUN \
     jq -r '.browser_download_url' | head -1) && \
   curl -sSL -o /usr/bin/qbittorrent-nox $QBT_URL && \
   chmod +x /usr/bin/qbittorrent-nox && \
+  chmod +x /entrypoint.sh && \
   apk del jq && \
   adduser -D -H -s /sbin/nologin -u 1000 qbtUser && \
   echo "permit nopass :root" >> "/etc/doas.d/doas.conf"
-
-COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/sbin/tini", "-g", "--", "/entrypoint.sh"]

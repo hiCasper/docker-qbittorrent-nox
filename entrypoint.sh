@@ -2,7 +2,7 @@
 
 downloadsPath="/downloads"
 profilePath="/config"
-qbtConfigFile="$profilePath/qBittorrent.conf"
+qbtConfigFile="$profilePath/qBittorrent/config/qBittorrent.conf"
 
 if [ -n "$PUID" ]; then
     sed -i "s|^qbtUser:x:[0-9]*:|qbtUser:x:$PUID:|g" /etc/passwd
@@ -37,8 +37,6 @@ Accepted=true
 EOF
 fi
 
-sed -i '/^\[LegalNotice\]$/{$!{N;s|\(\[LegalNotice\]\nAccepted=\).*|\1true|}}' "$qbtConfigFile"
-
 if [ -z "$QBT_WEBUI_PORT" ]; then
     QBT_WEBUI_PORT=6881
 fi
@@ -58,4 +56,5 @@ exec \
         qbittorrent-nox \
             --profile="$profilePath" \
             --webui-port="$QBT_WEBUI_PORT" \
+            --relative-fastresume \
             "$@"
