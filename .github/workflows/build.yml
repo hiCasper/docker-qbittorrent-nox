@@ -6,9 +6,6 @@ on:
         description: "qBittorrent version"
         required: true
         type: string
-  push:
-    branches:
-      - master
 
 jobs:
   build_images:
